@@ -3,171 +3,154 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>이소윤</title>
+<title>Information</title>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@300;400;500;700&display=swap');
-*{
-    margin:0;
-    padding:0;
-    box-sizing:border-box;
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Inter', sans-serif;
 }
-body{
-    font-family:'Pretendard',sans-serif;
-    background:#06060d;
-    color:white;
-    overflow-x:hidden;
+
+body {
+    background: #050505;
+    color: #fff;
+    height: 100vh;
+    overflow: hidden;
 }
-.background{
-    position:fixed;
-    inset:0;
-    z-index:-2;
-    background:
-    radial-gradient(circle at 20% 20%,rgba(120,80,255,.35),transparent 25%),
-    radial-gradient(circle at 80% 30%,rgba(0,150,255,.2),transparent 25%),
-    radial-gradient(circle at 50% 80%,rgba(255,80,180,.2),transparent 25%),
-    #06060d;
+
+.background {
+    position: fixed;
+    inset: 0;
+    background: radial-gradient(circle at 20% 20%, #111 0%, transparent 40%),
+                radial-gradient(circle at 80% 60%, #0a0a0a 0%, transparent 45%),
+                #050505;
 }
-.stars{
-    position:fixed;
-    inset:0;
-    z-index:-1;
-    background-image:
-    radial-gradient(white 1px,transparent 1px);
-    background-size:50px 50px;
-    opacity:.15;
+
+.topbar {
+    position: absolute;
+    top: 0;
+    width: 100%;
+    padding: 18px 40px;
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    opacity: 0.7;
 }
-.container{
-    max-width:1100px;
-    margin:auto;
-    padding:100px 25px;
+
+.center {
+    position: absolute;
+    top: 45%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
 }
-.hero{
-    text-align:center;
-    margin-bottom:80px;
+
+.title {
+    font-size: 72px;
+    font-weight: 700;
+    letter-spacing: -2px;
+    background: linear-gradient(90deg, #fff, #888);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
 }
-.hero h1{
-    font-size:5rem;
-    font-weight:700;
-    background:linear-gradient(90deg,#ffffff,#9d8dff);
-    -webkit-background-clip:text;
-    color:transparent;
+
+.subtitle {
+    margin-top: 10px;
+    font-size: 14px;
+    opacity: 0.6;
 }
-.hero p{
-    margin-top:15px;
-    color:#b5b5c9;
-    font-size:1.2rem;
+
+.cards {
+    position: absolute;
+    top: 62%;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 20px;
 }
-.card{
-    background:rgba(255,255,255,.05);
-    border:1px solid rgba(255,255,255,.08);
-    backdrop-filter:blur(20px);
-    border-radius:25px;
-    padding:30px;
-    margin-bottom:25px;
-    transition:.3s;
+
+.card {
+    width: 320px;
+    height: 220px;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 16px;
+    padding: 20px;
+    backdrop-filter: blur(12px);
+    transition: 0.3s;
 }
-.card:hover{
-    transform:translateY(-5px);
-    border-color:rgba(157,141,255,.4);
+
+.card:hover {
+    transform: translateY(-6px);
+    border-color: rgba(255,255,255,0.2);
 }
-h2{
-    margin-bottom:15px;
-    color:#b7a7ff;
+
+.card h2 {
+    font-size: 14px;
+    margin-bottom: 10px;
+    opacity: 0.7;
+    letter-spacing: 1px;
 }
-.about{
-    line-height:1.8;
-    color:#d6d6e8;
+
+.card .big {
+    font-size: 26px;
+    font-weight: 700;
+    margin-bottom: 10px;
 }
-.skills{
-    display:flex;
-    flex-wrap:wrap;
-    gap:12px;
+
+.card p {
+    font-size: 13px;
+    opacity: 0.6;
+    line-height: 1.5;
 }
-.skill{
-    padding:12px 18px;
-    border-radius:999px;
-    background:rgba(157,141,255,.12);
-    border:1px solid rgba(157,141,255,.25);
-}
-.contacts{
-    display:grid;
-    gap:12px;
-}
-.contact{
-    padding:15px;
-    background:rgba(255,255,255,.04);
-    border-radius:15px;
-}
-.footer{
-    text-align:center;
-    color:#7a7a8f;
-    margin-top:50px;
-}
-.glow{
-    color:#9d8dff;
-}
+
 </style>
 </head>
+
 <body>
 <div class="background"></div>
-<div class="stars"></div>
-<div class="container">
-    <section class="hero">
-        <h1>이소윤</h1>
-        <p>Roblox Developer · Web Developer</p>
-    </section>
-    <div class="card">
-        <h2>소개</h2>
-        <div class="about">
-            안녕하세요. 저는 이소윤입니다.<br><br>
-            로블록스 게임 개발과 웹 개발을 좋아하며,
-            아이디어를 실제 서비스와 경험으로 구현하는 과정에
-            큰 흥미를 가지고 있습니다.
-            새로운 기술을 배우고 다양한 프로젝트를 제작하며
-            꾸준히 성장하고 있습니다.
-        </div>
-    </div>
-    <div class="card">
-        <h2>기술 스택</h2>
-        <div class="skills">
-            <div class="skill">JavaScript</div>
-            <div class="skill">TypeScript</div>
-            <div class="skill">Lua</div>
-            <div class="skill">Python</div>
-            <div class="skill">HTML</div>
-            <div class="skill">CSS</div>
-        </div>
-    </div>
-    <div class="card">
-        <h2>관심 분야</h2>
-        <div class="about">
-            • Roblox Development<br>
-            • Web Development<br>
-            • UI / UX Design<br>
-            • Backend Systems<br>
-            • Automation
-        </div>
-    </div>
-    <div class="card">
-        <h2>연락처</h2>
-        <div class="contacts">
-            <div class="contact">
-                <span class="glow">Discord</span><br>
-                7f._1xew.er
-            </div>
-            <div class="contact">
-                <span class="glow">XChat</span><br>
-                0x1ffw
-            </div>
-            <div class="contact">
-                <span class="glow">Roblox</span><br>
-                1xV0e
-            </div>
-        </div>
-    </div>
-    <div class="footer">
-        © 2026 Lee Soyun
-    </div>
+
+<div class="topbar">
+    <div>INFORMATION</div>
 </div>
+
+<div class="center">
+    <div class="title">Information</div>
+    <div class="subtitle">개발 경력 5년 · 완성재단 개발자</div>
+</div>
+
+<div class="cards">
+
+    <div class="card">
+        <h2>PROFILE</h2>
+        <div class="big">이소윤</div>
+        <p>
+            로블록스 스튜디오 개발자<br>
+            구조 설계와 시스템 제작을 담당합니다.
+        </p>
+    </div>
+
+    <div class="card">
+        <h2>SOCIAL</h2>
+        <p>
+            Discord: 7f._1xew.er<br>
+            Xchat: 0x1ffw<br>
+            Roblox: 1xV0e<br>
+            GitHub: Lee5xy-on
+        </p>
+    </div>
+
+    <div class="card">
+        <h2>CONTACT</h2>
+        <p>
+            contactme@7fnxewer.xyz
+        </p>
+    </div>
+
+</div>
+
 </body>
 </html>
