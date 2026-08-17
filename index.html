@@ -2,207 +2,122 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
 
-    <title>Roblox Server Monitor</title>
+    <title>Roblox Live Servers</title>
 
     <style>
         * {
             box-sizing: border-box;
         }
 
-        html,
         body {
             margin: 0;
-            padding: 0;
-            width: 100%;
-            min-height: 100%;
-        }
+            min-height: 100vh;
 
-        body {
-            background: #0b0d10;
-            color: #f2f3f5;
+            background: #0d0d0f;
+            color: #ffffff;
+
             font-family:
-                Inter,
-                Pretendard,
-                -apple-system,
-                BlinkMacSystemFont,
-                "Segoe UI",
+                Arial,
+                "Noto Sans KR",
                 sans-serif;
         }
 
         .container {
-            width: min(1100px, calc(100% - 40px));
+            width: min(1100px, calc(100% - 32px));
             margin: 0 auto;
-            padding: 60px 0;
+            padding: 50px 0;
         }
 
-        .header {
-            display: flex;
-            align-items: flex-end;
-            justify-content: space-between;
-            gap: 20px;
-            margin-bottom: 35px;
-        }
-
-        .title {
+        h1 {
             margin: 0;
             font-size: 32px;
-            font-weight: 700;
-            letter-spacing: -1px;
         }
 
-        .description {
-            margin: 9px 0 0;
-            color: #8d929a;
-            font-size: 14px;
+        .subtitle {
+            margin-top: 8px;
+            color: #8c8c96;
         }
 
         .status {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            color: #9da3ac;
-            font-size: 13px;
-            white-space: nowrap;
-        }
-
-        .status-dot {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background: #4ade80;
-        }
-
-        .status-dot.offline {
-            background: #ef4444;
+            margin-top: 25px;
+            color: #8c8c96;
+            font-size: 14px;
         }
 
         .games {
             display: grid;
-            grid-template-columns: repeat(
-                auto-fill,
-                minmax(280px, 1fr)
-            );
+            grid-template-columns:
+                repeat(auto-fill, minmax(280px, 1fr));
+
             gap: 16px;
+            margin-top: 25px;
         }
 
         .game {
             display: flex;
             align-items: center;
-            gap: 15px;
 
             padding: 16px;
 
-            background: #12151a;
-            border: 1px solid #20242b;
+            background: #151518;
+            border: 1px solid #242429;
             border-radius: 14px;
 
             transition:
-                border-color 0.2s,
-                transform 0.2s;
+                transform 0.15s ease,
+                border-color 0.15s ease;
         }
 
         .game:hover {
-            border-color: #343a44;
             transform: translateY(-2px);
+            border-color: #3a3a42;
         }
 
         .icon {
             width: 64px;
             height: 64px;
-            flex-shrink: 0;
 
             border-radius: 12px;
+
             object-fit: cover;
 
-            background: #1b1f26;
+            background: #222228;
+
+            flex-shrink: 0;
         }
 
-        .game-info {
+        .info {
             min-width: 0;
-            flex: 1;
+            margin-left: 14px;
         }
 
-        .game-name {
-            overflow: hidden;
-
-            margin: 0 0 7px;
-
-            font-size: 16px;
+        .name {
+            font-size: 17px;
             font-weight: 600;
 
             white-space: nowrap;
+            overflow: hidden;
             text-overflow: ellipsis;
         }
 
         .players {
-            display: flex;
-            align-items: center;
-            gap: 6px;
+            margin-top: 7px;
 
-            color: #9da3ac;
-            font-size: 13px;
-        }
-
-        .players-dot {
-            width: 7px;
-            height: 7px;
-            border-radius: 50%;
-            background: #4ade80;
+            color: #9d9da7;
+            font-size: 14px;
         }
 
         .empty {
-            padding: 80px 20px;
+            padding: 50px 20px;
 
             text-align: center;
 
-            color: #777d87;
-
-            border: 1px dashed #292e36;
-            border-radius: 14px;
-        }
-
-        .loading {
-            padding: 80px 20px;
-
-            text-align: center;
-
-            color: #777d87;
-        }
-
-        .error {
-            padding: 20px;
-
-            color: #fca5a5;
-
-            background: #211417;
-            border: 1px solid #482126;
-            border-radius: 12px;
-        }
-
-        .footer {
-            margin-top: 35px;
-
-            color: #555b64;
-            font-size: 12px;
-            text-align: center;
-        }
-
-        @media (max-width: 600px) {
-            .container {
-                width: min(100% - 24px, 1100px);
-                padding: 35px 0;
-            }
-
-            .header {
-                align-items: flex-start;
-                flex-direction: column;
-            }
-
-            .title {
-                font-size: 26px;
-            }
+            color: #777780;
         }
     </style>
 </head>
@@ -211,227 +126,153 @@
 
 <div class="container">
 
-    <header class="header">
-        <div>
-            <h1 class="title">Roblox Server Monitor</h1>
+    <h1>Roblox Live Servers</h1>
 
-            <p class="description">
-                현재 활성 상태인 게임 서버
-            </p>
-        </div>
+    <div class="subtitle">
+        현재 실행 중인 게임 서버
+    </div>
 
-        <div class="status">
-            <span
-                id="statusDot"
-                class="status-dot"
-            ></span>
+    <div id="status" class="status">
+        서버 정보를 불러오는 중...
+    </div>
 
-            <span id="statusText">
-                연결 중
-            </span>
-        </div>
-    </header>
-
-    <main>
-        <div
-            id="games"
-            class="loading"
-        >
-            서버 정보를 불러오는 중...
-        </div>
-    </main>
-
-    <footer class="footer">
-        Last updated:
-        <span id="updatedAt">-</span>
-    </footer>
+    <div id="games" class="games"></div>
 
 </div>
 
 <script>
-    /*
-     * 여기에 Cloudflare Worker 주소를 넣으십시오.
-     *
-     * 예:
-     * https://roblox-backend.example.workers.dev
-     */
-    const API =
-        "https://biopage.jammin-is-cute.workers.dev";
 
-    const gamesElement =
-        document.getElementById("games");
-
-    const statusText =
-        document.getElementById("statusText");
-
-    const statusDot =
-        document.getElementById("statusDot");
-
-    const updatedAt =
-        document.getElementById("updatedAt");
+const API =
+    "https://biopage-worker.jammin-is-cute.workers.dev";
 
 
-    async function loadGames() {
+const gamesElement =
+    document.getElementById("games");
 
-        try {
+const statusElement =
+    document.getElementById("status");
 
-            const response = await fetch(
-                `${API}/games`,
+
+async function loadGames() {
+
+    try {
+
+        const response =
+            await fetch(
+                `${API}/api/games`,
                 {
-                    method: "GET",
                     cache: "no-store"
                 }
             );
 
-            if (!response.ok) {
-                throw new Error(
-                    `HTTP ${response.status}`
-                );
-            }
-
-            const data =
-                await response.json();
-
-            renderGames(data.games || []);
-
-            setOnline();
-
-            updatedAt.textContent =
-                new Date().toLocaleTimeString(
-                    "ko-KR"
-                );
-
-        } catch (error) {
-
-            console.error(error);
-
-            setOffline();
-
-            gamesElement.innerHTML = `
-                <div class="error">
-                    서버 정보를 가져오지 못했습니다.
-                </div>
-            `;
-        }
-    }
-
-
-    function renderGames(games) {
-
-        if (games.length === 0) {
-
-            gamesElement.className = "empty";
-
-            gamesElement.innerHTML = `
-                현재 활성화된 게임 서버가 없습니다.
-            `;
-
-            return;
+        if (!response.ok) {
+            throw new Error(
+                `HTTP ${response.status}`
+            );
         }
 
-        gamesElement.className = "games";
+        const data =
+            await response.json();
 
-        gamesElement.innerHTML =
-            games.map(game => {
+        renderGames(data.games || []);
 
-                const icon =
-                    escapeHtml(
-                        game.icon || ""
-                    );
+        statusElement.textContent =
+            `현재 ${data.count || 0}개의 게임 서버가 온라인입니다.`;
 
-                const name =
-                    escapeHtml(
-                        game.name || "Unknown Game"
-                    );
+    } catch (error) {
 
-                const players =
-                    Number(game.players) || 0;
+        console.error(error);
 
-                return `
-                    <article class="game">
+        statusElement.textContent =
+            "서버 정보를 가져오지 못했습니다.";
 
-                        <img
-                            class="icon"
-                            src="${icon}"
-                            alt=""
-                            loading="lazy"
-                            onerror="
-                                this.style.visibility='hidden'
-                            "
-                        >
+    }
+}
 
-                        <div class="game-info">
 
-                            <h2 class="game-name">
-                                ${name}
-                            </h2>
+function renderGames(games) {
 
-                            <div class="players">
+    gamesElement.innerHTML = "";
 
-                                <span
-                                    class="players-dot"
-                                ></span>
+    if (games.length === 0) {
 
-                                ${players.toLocaleString()}
-                                명 플레이 중
+        gamesElement.innerHTML = `
+            <div class="empty">
+                현재 실행 중인 게임 서버가 없습니다.
+            </div>
+        `;
 
-                            </div>
-
-                        </div>
-
-                    </article>
-                `;
-
-            }).join("");
+        return;
     }
 
 
-    function setOnline() {
+    for (const game of games) {
 
-        statusDot.classList.remove(
-            "offline"
-        );
+        const element =
+            document.createElement("div");
 
-        statusText.textContent =
-            "연결됨";
+        element.className = "game";
+
+
+        const icon =
+            document.createElement("img");
+
+        icon.className = "icon";
+
+        icon.src =
+            game.icon ||
+            "https://tr.rbxcdn.com/180DAY-0/150/150/Image/Webp/noFilter";
+
+
+        const info =
+            document.createElement("div");
+
+        info.className = "info";
+
+
+        const name =
+            document.createElement("div");
+
+        name.className = "name";
+
+        name.textContent =
+            game.name || "Unknown Game";
+
+
+        const players =
+            document.createElement("div");
+
+        players.className = "players";
+
+        players.textContent =
+            `${Number(game.playing || 0).toLocaleString()}명 접속 중`;
+
+
+        info.appendChild(name);
+        info.appendChild(players);
+
+        element.appendChild(icon);
+        element.appendChild(info);
+
+        gamesElement.appendChild(element);
     }
+}
 
 
-    function setOffline() {
+/*
+ * 5초마다 목록 갱신.
+ *
+ * Worker의 활성 TTL은 12초이므로
+ * 서버가 죽으면 최대 약 12초 안에 사라집니다.
+ */
 
-        statusDot.classList.add(
-            "offline"
-        );
+loadGames();
 
-        statusText.textContent =
-            "연결 오류";
-    }
+setInterval(
+    loadGames,
+    5000
+);
 
-
-    function escapeHtml(value) {
-
-        return String(value)
-            .replaceAll("&", "&amp;")
-            .replaceAll("<", "&lt;")
-            .replaceAll(">", "&gt;")
-            .replaceAll('"', "&quot;")
-            .replaceAll("'", "&#039;");
-    }
-
-
-    /*
-     * 최초 실행
-     */
-    loadGames();
-
-
-    /*
-     * 5초마다 갱신
-     */
-    setInterval(
-        loadGames,
-        5000
-    );
 </script>
 
 </body>
