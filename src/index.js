@@ -475,57 +475,6 @@ async function fetchGameMetadata(placeId) {
     }
 }
 
-        /*
-         * 게임 아이콘 조회
-         */
-
-        let icon = null;
-
-        const iconUrl =
-            `https://thumbnails.roblox.com/v1/games/icons?universeIds=${universeId}&returnPolicy=PlaceHolder&size=512x512&format=Png&isCircular=false`;
-
-        const iconResponse = await fetch(
-            iconUrl,
-            {
-                headers: ROBLOX_API_HEADERS
-            }
-        );
-
-        if (iconResponse.ok) {
-            const iconData =
-                await iconResponse.json();
-
-            if (
-                Array.isArray(iconData.data) &&
-                iconData.data.length > 0
-            ) {
-                icon =
-                    iconData.data[0].imageUrl ??
-                    null;
-            }
-        }
-
-        return {
-            name:
-                game.name ??
-                "Unknown Game",
-
-            icon: icon,
-
-            universeId:
-                universeId
-        };
-
-    } catch (error) {
-        console.error(
-            "[Roblox Metadata Exception]",
-            error
-        );
-
-        return null;
-    }
-}
-
 
 /*
  * ============================================================
