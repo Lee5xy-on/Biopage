@@ -344,30 +344,47 @@ async function fetchGameMetadata(placeId) {
     const url =
         `https://games.roblox.com/v1/games/multiget-place-details?placeIds=${placeId}`;
 
+    console.log("[Roblox Metadata Request]", url);
+
     try {
-        const response = await fetch(
-            url,
-            {
-                headers: ROBLOX_API_HEADERS
+        const response = await fetch(url, {
+            method: "GET",
+            headers: {
+                "User-Agent":
+                    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+                "Accept": "application/json"
             }
+        });
+
+        const text = await response.text();
+
+        console.log(
+            "[Roblox Metadata Response]",
+            response.status,
+            text
         );
 
         if (!response.ok) {
+            return null;
+        }
+
+        let data;
+
+        try {
+            data = JSON.parse(text);
+        } catch (error) {
             console.error(
-                `[Roblox Metadata Fail] Status: ${response.status} ${response.statusText}`
+                "[Roblox Metadata JSON Parse Error]",
+                error
             );
 
             return null;
         }
 
-        const data = await response.json();
-
-        if (
-            !Array.isArray(data) ||
-            !data[0]
-        ) {
+        if (!Array.isArray(data) || !data[0]) {
             console.error(
-                `[Roblox Metadata Fail] Empty response for placeId: ${placeId}`
+                "[Roblox Metadata Empty]",
+                data
             );
 
             return null;
@@ -384,11 +401,79 @@ async function fetchGameMetadata(placeId) {
             universeId <= 0
         ) {
             console.error(
-                `[Roblox Metadata Fail] Missing universeId for placeId: ${placeId}`
+                "[Roblox Metadata Invalid Universe ID]",
+                game
             );
 
             return null;
         }
+
+        let icon = null;
+
+        const iconUrl =
+            `https://thumbnails.roblox.com/v1/games/icons?universeIds=${universeId}&returnPolicy=PlaceHolder&size=512x512&format=Png&isCircular=false`;
+
+        const iconResponse = await fetch(
+            iconUrl,
+            {
+                headers: {
+                    "User-Agent":
+                        "Mozilla/5.0",
+                    "Accept":
+                        "application/json"
+                }
+            }
+        );
+
+        if (iconResponse.ok) {
+            const iconText =
+                await iconResponse.text();
+
+            console.log(
+                "[Roblox Icon Response]",
+                iconResponse.status,
+                iconText
+            );
+
+            try {
+                const iconData =
+                    JSON.parse(iconText);
+
+                if (
+                    Array.isArray(iconData.data) &&
+                    iconData.data.length > 0
+                ) {
+                    icon =
+                        iconData.data[0].imageUrl ??
+                        null;
+                }
+            } catch (error) {
+                console.error(
+                    "[Roblox Icon JSON Parse Error]",
+                    error
+                );
+            }
+        }
+
+        return {
+            name:
+                game.name ??
+                "Unknown Game",
+
+            icon,
+
+            universeId
+        };
+
+    } catch (error) {
+        console.error(
+            "[Roblox Metadata Fetch Exception]",
+            error
+        );
+
+        return null;
+    }
+}
 
         /*
          * 게임 아이콘 조회
