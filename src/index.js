@@ -1,6 +1,12 @@
 const LIVE_TTL = 12;
 const META_TTL = 86400;
 
+// 로블록스 API 차단을 방지하기 위한 브라우저 헤더
+const ROBLOX_API_HEADERS = {
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+    "Accept": "application/json"
+};
+
 export default {
     async fetch(request, env) {
         const url = new URL(request.url);
@@ -75,14 +81,6 @@ export default {
  * ============================================================
  * POST /api/heartbeat
  * ============================================================
- *
- * Roblox 서버에서:
- *
- * {
- *     "placeId": 123456789
- * }
- *
- * 만 전송합니다.
  */
 async function heartbeat(request, env) {
     let body;
@@ -112,54 +110,42 @@ async function heartbeat(request, env) {
         );
     }
 
-    const metaKey =
-        `game_meta:${placeId}`;
-
-    const liveKey =
-        `game_live:${placeId}`;
+    const metaKey = `game_meta:${placeId}`;
+    const liveKey = `game_live:${placeId}`;
 
     /*
      * --------------------------------------------------------
      * 1. 게임 메타데이터 캐시 확인
      * --------------------------------------------------------
      */
-
-    let meta =
-        await env.MONITOR_KV.get(
-            metaKey,
-            "json"
-        );
+    let meta = await env.MONITOR_KV.get(
+        metaKey,
+        "json"
+    );
 
     /*
      * --------------------------------------------------------
-     * 2. 최초 발견된 Place ID
+     * 2. 최초 발견된 Place ID -> 메타데이터 조회
      * --------------------------------------------------------
      */
-
     if (!meta) {
         console.log(
             `[Metadata] New Place ID: ${placeId}`
         );
 
-        meta =
-            await fetchGameMetadata(
-                placeId
-            );
+        meta = await fetchGameMetadata(placeId);
 
         if (!meta) {
             return json(
                 {
-                    error:
-                        "Unable to fetch Roblox game metadata"
+                    error: "Unable to fetch Roblox game metadata"
                 },
                 502
             );
         }
 
         /*
-         * 이름 / 아이콘 / Universe ID 저장
-         *
-         * 24시간 캐시
+         * 이름 / 아이콘 / Universe ID 저장 (24시간 캐시)
          */
         await env.MONITOR_KV.put(
             metaKey,
@@ -176,8 +162,7 @@ async function heartbeat(request, env) {
     if (!meta.universeId) {
         return json(
             {
-                error:
-                    "Universe ID not found"
+                error: "Universe ID not found"
             },
             502
         );
@@ -188,17 +173,12 @@ async function heartbeat(request, env) {
      * 3. Roblox API에서 전체 게임 동접자 조회
      * --------------------------------------------------------
      */
-
-    const players =
-        await fetchPlayerCount(
-            meta.universeId
-        );
+    const players = await fetchPlayerCount(meta.universeId);
 
     if (players === null) {
         return json(
             {
-                error:
-                    "Unable to fetch Roblox player count"
+                error: "Unable to fetch Roblox player count"
             },
             502
         );
@@ -206,15 +186,9 @@ async function heartbeat(request, env) {
 
     /*
      * --------------------------------------------------------
-     * 4. 실시간 상태 저장
+     * 4. 실시간 상태 저장 (TTL = 12초)
      * --------------------------------------------------------
-     *
-     * TTL = 12초
-     *
-     * 다음 heartbeat가 들어오면
-     * TTL이 다시 12초로 초기화됩니다.
      */
-
     const live = {
         placeId: placeId,
         players: players,
@@ -245,17 +219,11 @@ async function heartbeat(request, env) {
  * ============================================================
  * GET /api/games
  * ============================================================
- *
- * 현재 살아있는 게임 목록
  */
 async function getGames(env) {
     const games = [];
-
     let cursor = undefined;
 
-    /*
-     * KV list pagination
-     */
     do {
         const options = {
             prefix: "game_live:",
@@ -266,75 +234,32 @@ async function getGames(env) {
             options.cursor = cursor;
         }
 
-        const result =
-            await env.MONITOR_KV.list(
-                options
-            );
+        const result = await env.MONITOR_KV.list(options);
 
         for (const key of result.keys) {
-            const placeId =
-                key.name.substring(
-                    "game_live:".length
-                );
+            const placeId = key.name.substring("game_live:".length);
 
-            /*
-             * 실시간 데이터
-             */
-            const live =
-                await env.MONITOR_KV.get(
-                    key.name,
-                    "json"
-                );
+            const live = await env.MONITOR_KV.get(key.name, "json");
+            if (!live) continue;
 
-            if (!live) {
-                continue;
-            }
-
-            /*
-             * 메타데이터
-             */
-            const meta =
-                await env.MONITOR_KV.get(
-                    `game_meta:${placeId}`,
-                    "json"
-                );
-
-            if (!meta) {
-                continue;
-            }
+            const meta = await env.MONITOR_KV.get(`game_meta:${placeId}`, "json");
+            if (!meta) continue;
 
             games.push({
-                placeId:
-                    Number(placeId),
-
-                name:
-                    meta.name,
-
-                icon:
-                    meta.icon,
-
-                players:
-                    Number(live.players),
-
-                lastSeen:
-                    live.lastSeen
+                placeId: Number(placeId),
+                name: meta.name,
+                icon: meta.icon,
+                players: Number(live.players),
+                lastSeen: live.lastSeen
             });
         }
 
-        cursor =
-            result.list_complete
-                ? undefined
-                : result.cursor;
+        cursor = result.list_complete ? undefined : result.cursor;
 
     } while (cursor);
 
-    /*
-     * 동접자 수가 높은 게임부터 정렬
-     */
-    games.sort(
-        (a, b) =>
-            b.players - a.players
-    );
+    // 동접자 수가 높은 순으로 정렬
+    games.sort((a, b) => b.players - a.players);
 
     return json({
         games: games
@@ -344,150 +269,90 @@ async function getGames(env) {
 
 /*
  * ============================================================
- * Roblox Games API
+ * Roblox Games API (메타데이터 및 아이콘 조회)
  * ============================================================
- *
- * Place ID
- *      ↓
- * Universe ID
- *      ↓
- * 게임 이름
  */
 async function fetchGameMetadata(placeId) {
-    const url =
-        `https://games.roblox.com/v1/games/multiget-place-details?placeIds=${placeId}`;
+    const url = `https://games.roblox.com/v1/games/multiget-place-details?placeIds=${placeId}`;
 
-    const response =
-        await fetch(url, {
-            headers: {
-                "User-Agent":
-                    "RobloxServerMonitor/1.0"
-            }
-        });
+    const response = await fetch(url, {
+        headers: ROBLOX_API_HEADERS
+    });
 
     if (!response.ok) {
         console.error(
-            "[Roblox Metadata]",
-            response.status,
-            response.statusText
+            `[Roblox Metadata Fail] Status: ${response.status} ${response.statusText}`
         );
-
         return null;
     }
 
-    const data =
-        await response.json();
+    const data = await response.json();
 
-    if (
-        !Array.isArray(data) ||
-        !data[0]
-    ) {
+    if (!Array.isArray(data) || !data[0]) {
+        console.error(`[Roblox Metadata Fail] Empty response for placeId: ${placeId}`);
         return null;
     }
 
     const game = data[0];
-
-    const universeId =
-        game.universeId;
+    const universeId = game.universeId;
 
     if (!universeId) {
+        console.error(`[Roblox Metadata Fail] Missing universeId for placeId: ${placeId}`);
         return null;
     }
 
     /*
-     * --------------------------------------------------------
-     * 게임 아이콘
-     * --------------------------------------------------------
+     * 게임 아이콘 조회
      */
-
     let icon = null;
+    const iconUrl = `https://thumbnails.roblox.com/v1/games/icons?universeIds=${universeId}&returnPolicy=PlaceHolder&size=512x512&format=Png&isCircular=false`;
 
-    const iconUrl =
-        `https://thumbnails.roblox.com/v1/games/icons` +
-        `?universeIds=${universeId}` +
-        `&returnPolicy=PlaceHolder` +
-        `&size=512x512` +
-        `&format=Png` +
-        `&isCircular=false`;
-
-    const iconResponse =
-        await fetch(iconUrl);
+    const iconResponse = await fetch(iconUrl, {
+        headers: ROBLOX_API_HEADERS
+    });
 
     if (iconResponse.ok) {
-        const iconData =
-            await iconResponse.json();
-
-        if (
-            Array.isArray(iconData.data) &&
-            iconData.data.length > 0
-        ) {
-            icon =
-                iconData.data[0].imageUrl ??
-                null;
+        const iconData = await iconResponse.json();
+        if (Array.isArray(iconData.data) && iconData.data.length > 0) {
+            icon = iconData.data[0].imageUrl ?? null;
         }
     }
 
     return {
-        name:
-            game.name ??
-            "Unknown Game",
-
-        icon:
-            icon,
-
-        universeId:
-            universeId
+        name: game.name ?? "Unknown Game",
+        icon: icon,
+        universeId: universeId
     };
 }
 
 
 /*
  * ============================================================
- * Roblox 전체 동접자 조회
+ * Roblox 전체 동접자 조회 API
  * ============================================================
- *
- * Universe ID를 사용합니다.
- *
- * 반환되는 `playing`은
- * 해당 Universe 전체의 현재 플레이어 수입니다.
  */
 async function fetchPlayerCount(universeId) {
-    const url =
-        `https://games.roblox.com/v1/games?universeIds=${universeId}`;
+    const url = `https://games.roblox.com/v1/games?universeIds=${universeId}`;
 
-    const response =
-        await fetch(url, {
-            headers: {
-                "User-Agent":
-                    "RobloxServerMonitor/1.0"
-            }
-        });
+    const response = await fetch(url, {
+        headers: ROBLOX_API_HEADERS
+    });
 
     if (!response.ok) {
         console.error(
-            "[Roblox Player Count]",
-            response.status,
-            response.statusText
+            `[Roblox Player Count Fail] Status: ${response.status} ${response.statusText}`
         );
-
         return null;
     }
 
-    const data =
-        await response.json();
+    const data = await response.json();
 
-    if (
-        !data ||
-        !Array.isArray(data.data) ||
-        !data.data[0]
-    ) {
+    if (!data || !Array.isArray(data.data) || !data.data[0]) {
+        console.error(`[Roblox Player Count Fail] Empty data for universeId: ${universeId}`);
         return null;
     }
 
-    const playing =
-        Number(
-            data.data[0].playing
-        );
+    const playing = Number(data.data[0].playing);
 
     if (!Number.isFinite(playing)) {
         return null;
@@ -499,7 +364,7 @@ async function fetchPlayerCount(universeId) {
 
 /*
  * ============================================================
- * JSON Response
+ * Helper Functions
  * ============================================================
  */
 function json(data, status = 200) {
@@ -507,32 +372,18 @@ function json(data, status = 200) {
         JSON.stringify(data),
         {
             status: status,
-
             headers: {
                 ...corsHeaders(),
-
-                "Content-Type":
-                    "application/json; charset=utf-8"
+                "Content-Type": "application/json; charset=utf-8"
             }
         }
     );
 }
 
-
-/*
- * ============================================================
- * CORS
- * ============================================================
- */
 function corsHeaders() {
     return {
-        "Access-Control-Allow-Origin":
-            "*",
-
-        "Access-Control-Allow-Methods":
-            "GET, POST, OPTIONS",
-
-        "Access-Control-Allow-Headers":
-            "Content-Type, Authorization"
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+        "Access-Control-Allow-Headers": "Content-Type, Authorization"
     };
 }
