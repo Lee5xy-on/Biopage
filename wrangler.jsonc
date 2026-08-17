@@ -1,0 +1,13 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "roblox-Backend",
+  "main": "src/index.js",
+  "compatibility_date": "2026-08-17",
+
+  "kv_namespaces": [
+    {
+      "binding": "MONITOR_KV",
+      "id": "dce30623d10f44539533f71ed9332173"
+    }
+  ]
+}
