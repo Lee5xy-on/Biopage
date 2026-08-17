@@ -1,6 +1,6 @@
 {
   "$schema": "./node_modules/wrangler/config-schema.json",
-  "name": "roblox-Backend",
+  "name": "roblox-backend",
   "main": "src/index.js",
   "compatibility_date": "2026-08-17",
 
