@@ -1,156 +1,438 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Information</title>
-<style>
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    font-family: 'Inter', sans-serif;
-}
+    <title>Roblox Server Monitor</title>
 
-body {
-    background: #050505;
-    color: #fff;
-    height: 100vh;
-    overflow: hidden;
-}
+    <style>
+        * {
+            box-sizing: border-box;
+        }
 
-.background {
-    position: fixed;
-    inset: 0;
-    background: radial-gradient(circle at 20% 20%, #111 0%, transparent 40%),
-                radial-gradient(circle at 80% 60%, #0a0a0a 0%, transparent 45%),
-                #050505;
-}
+        html,
+        body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            min-height: 100%;
+        }
 
-.topbar {
-    position: absolute;
-    top: 0;
-    width: 100%;
-    padding: 18px 40px;
-    display: flex;
-    justify-content: space-between;
-    font-size: 12px;
-    opacity: 0.7;
-}
+        body {
+            background: #0b0d10;
+            color: #f2f3f5;
+            font-family:
+                Inter,
+                Pretendard,
+                -apple-system,
+                BlinkMacSystemFont,
+                "Segoe UI",
+                sans-serif;
+        }
 
-.center {
-    position: absolute;
-    top: 45%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    text-align: center;
-}
+        .container {
+            width: min(1100px, calc(100% - 40px));
+            margin: 0 auto;
+            padding: 60px 0;
+        }
 
-.title {
-    font-size: 72px;
-    font-weight: 700;
-    letter-spacing: -2px;
-    background: linear-gradient(90deg, #fff, #888);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-}
+        .header {
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-between;
+            gap: 20px;
+            margin-bottom: 35px;
+        }
 
-.subtitle {
-    margin-top: 10px;
-    font-size: 14px;
-    opacity: 0.6;
-}
+        .title {
+            margin: 0;
+            font-size: 32px;
+            font-weight: 700;
+            letter-spacing: -1px;
+        }
 
-.cards {
-    position: absolute;
-    top: 62%;
-    left: 50%;
-    transform: translateX(-50%);
-    display: flex;
-    gap: 20px;
-}
+        .description {
+            margin: 9px 0 0;
+            color: #8d929a;
+            font-size: 14px;
+        }
 
-.card {
-    width: 320px;
-    height: 220px;
-    background: rgba(255,255,255,0.04);
-    border: 1px solid rgba(255,255,255,0.08);
-    border-radius: 16px;
-    padding: 20px;
-    backdrop-filter: blur(12px);
-    transition: 0.3s;
-}
+        .status {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #9da3ac;
+            font-size: 13px;
+            white-space: nowrap;
+        }
 
-.card:hover {
-    transform: translateY(-6px);
-    border-color: rgba(255,255,255,0.2);
-}
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #4ade80;
+        }
 
-.card h2 {
-    font-size: 14px;
-    margin-bottom: 10px;
-    opacity: 0.7;
-    letter-spacing: 1px;
-}
+        .status-dot.offline {
+            background: #ef4444;
+        }
 
-.card .big {
-    font-size: 26px;
-    font-weight: 700;
-    margin-bottom: 10px;
-}
+        .games {
+            display: grid;
+            grid-template-columns: repeat(
+                auto-fill,
+                minmax(280px, 1fr)
+            );
+            gap: 16px;
+        }
 
-.card p {
-    font-size: 13px;
-    opacity: 0.6;
-    line-height: 1.5;
-}
+        .game {
+            display: flex;
+            align-items: center;
+            gap: 15px;
 
-</style>
+            padding: 16px;
+
+            background: #12151a;
+            border: 1px solid #20242b;
+            border-radius: 14px;
+
+            transition:
+                border-color 0.2s,
+                transform 0.2s;
+        }
+
+        .game:hover {
+            border-color: #343a44;
+            transform: translateY(-2px);
+        }
+
+        .icon {
+            width: 64px;
+            height: 64px;
+            flex-shrink: 0;
+
+            border-radius: 12px;
+            object-fit: cover;
+
+            background: #1b1f26;
+        }
+
+        .game-info {
+            min-width: 0;
+            flex: 1;
+        }
+
+        .game-name {
+            overflow: hidden;
+
+            margin: 0 0 7px;
+
+            font-size: 16px;
+            font-weight: 600;
+
+            white-space: nowrap;
+            text-overflow: ellipsis;
+        }
+
+        .players {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+
+            color: #9da3ac;
+            font-size: 13px;
+        }
+
+        .players-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: #4ade80;
+        }
+
+        .empty {
+            padding: 80px 20px;
+
+            text-align: center;
+
+            color: #777d87;
+
+            border: 1px dashed #292e36;
+            border-radius: 14px;
+        }
+
+        .loading {
+            padding: 80px 20px;
+
+            text-align: center;
+
+            color: #777d87;
+        }
+
+        .error {
+            padding: 20px;
+
+            color: #fca5a5;
+
+            background: #211417;
+            border: 1px solid #482126;
+            border-radius: 12px;
+        }
+
+        .footer {
+            margin-top: 35px;
+
+            color: #555b64;
+            font-size: 12px;
+            text-align: center;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                width: min(100% - 24px, 1100px);
+                padding: 35px 0;
+            }
+
+            .header {
+                align-items: flex-start;
+                flex-direction: column;
+            }
+
+            .title {
+                font-size: 26px;
+            }
+        }
+    </style>
 </head>
 
 <body>
-<div class="background"></div>
 
-<div class="topbar">
-    <div>INFORMATION</div>
+<div class="container">
+
+    <header class="header">
+        <div>
+            <h1 class="title">Roblox Server Monitor</h1>
+
+            <p class="description">
+                현재 활성 상태인 게임 서버
+            </p>
+        </div>
+
+        <div class="status">
+            <span
+                id="statusDot"
+                class="status-dot"
+            ></span>
+
+            <span id="statusText">
+                연결 중
+            </span>
+        </div>
+    </header>
+
+    <main>
+        <div
+            id="games"
+            class="loading"
+        >
+            서버 정보를 불러오는 중...
+        </div>
+    </main>
+
+    <footer class="footer">
+        Last updated:
+        <span id="updatedAt">-</span>
+    </footer>
+
 </div>
 
-<div class="center">
-    <div class="title">Information</div>
-    <div class="subtitle">개발 경력 5년 · 완성재단 개발자</div>
-</div>
+<script>
+    /*
+     * 여기에 Cloudflare Worker 주소를 넣으십시오.
+     *
+     * 예:
+     * https://roblox-backend.example.workers.dev
+     */
+    const API =
+        "biopage.jammin-is-cute.workers.dev";
 
-<div class="cards">
+    const gamesElement =
+        document.getElementById("games");
 
-    <div class="card">
-        <h2>PROFILE</h2>
-        <div class="big">이소윤</div>
-        <p>
-            로블록스 스튜디오 개발자<br>
-            구조 설계와 시스템 제작을 담당합니다.
-        </p>
-    </div>
+    const statusText =
+        document.getElementById("statusText");
 
-    <div class="card">
-        <h2>SOCIAL</h2>
-        <p>
-            Discord: 7f._1xew.er<br>
-            Xchat: 0x1ffw<br>
-            Roblox: 1xV0e<br>
-            GitHub: Lee5xy-on
-        </p>
-    </div>
+    const statusDot =
+        document.getElementById("statusDot");
 
-    <div class="card">
-        <h2>CONTACT</h2>
-        <p>
-            contactme@7fnxewer.xyz
-        </p>
-    </div>
+    const updatedAt =
+        document.getElementById("updatedAt");
 
-</div>
+
+    async function loadGames() {
+
+        try {
+
+            const response = await fetch(
+                `${API}/games`,
+                {
+                    method: "GET",
+                    cache: "no-store"
+                }
+            );
+
+            if (!response.ok) {
+                throw new Error(
+                    `HTTP ${response.status}`
+                );
+            }
+
+            const data =
+                await response.json();
+
+            renderGames(data.games || []);
+
+            setOnline();
+
+            updatedAt.textContent =
+                new Date().toLocaleTimeString(
+                    "ko-KR"
+                );
+
+        } catch (error) {
+
+            console.error(error);
+
+            setOffline();
+
+            gamesElement.innerHTML = `
+                <div class="error">
+                    서버 정보를 가져오지 못했습니다.
+                </div>
+            `;
+        }
+    }
+
+
+    function renderGames(games) {
+
+        if (games.length === 0) {
+
+            gamesElement.className = "empty";
+
+            gamesElement.innerHTML = `
+                현재 활성화된 게임 서버가 없습니다.
+            `;
+
+            return;
+        }
+
+        gamesElement.className = "games";
+
+        gamesElement.innerHTML =
+            games.map(game => {
+
+                const icon =
+                    escapeHtml(
+                        game.icon || ""
+                    );
+
+                const name =
+                    escapeHtml(
+                        game.name || "Unknown Game"
+                    );
+
+                const players =
+                    Number(game.players) || 0;
+
+                return `
+                    <article class="game">
+
+                        <img
+                            class="icon"
+                            src="${icon}"
+                            alt=""
+                            loading="lazy"
+                            onerror="
+                                this.style.visibility='hidden'
+                            "
+                        >
+
+                        <div class="game-info">
+
+                            <h2 class="game-name">
+                                ${name}
+                            </h2>
+
+                            <div class="players">
+
+                                <span
+                                    class="players-dot"
+                                ></span>
+
+                                ${players.toLocaleString()}
+                                명 플레이 중
+
+                            </div>
+
+                        </div>
+
+                    </article>
+                `;
+
+            }).join("");
+    }
+
+
+    function setOnline() {
+
+        statusDot.classList.remove(
+            "offline"
+        );
+
+        statusText.textContent =
+            "연결됨";
+    }
+
+
+    function setOffline() {
+
+        statusDot.classList.add(
+            "offline"
+        );
+
+        statusText.textContent =
+            "연결 오류";
+    }
+
+
+    function escapeHtml(value) {
+
+        return String(value)
+            .replaceAll("&", "&amp;")
+            .replaceAll("<", "&lt;")
+            .replaceAll(">", "&gt;")
+            .replaceAll('"', "&quot;")
+            .replaceAll("'", "&#039;");
+    }
+
+
+    /*
+     * 최초 실행
+     */
+    loadGames();
+
+
+    /*
+     * 5초마다 갱신
+     */
+    setInterval(
+        loadGames,
+        5000
+    );
+</script>
 
 </body>
 </html>
