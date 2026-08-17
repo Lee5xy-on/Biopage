@@ -1,5 +1,5 @@
 {
-  "name": "robloxbackend",
+  "name": "roblox-backend",
   "private": true,
   "scripts": {
     "dev": "wrangler dev",
